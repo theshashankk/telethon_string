@@ -6,6 +6,7 @@
 import asyncio
 import logging
 import os
+import random
 import sys
 from telethon import TelegramClient, events, custom
 from telethon.sessions import StringSession
@@ -32,12 +33,18 @@ else:
 from translation import Translation
 
 
+def GetAppIDApiHash(APP_IDS, API_HASHS):
+    total_ids = len(APP_IDS)
+    random_index = random.randint(0, len(total_ids) - 1)
+    return APP_IDS[random_index], API_HASHS[random_index]
+
+
 async def main():
     # We have to manually call "start" if we want an explicit bot token
     UniBorgBotClient = await TelegramClient(
         "UniBorgBot",
-        Config.APP_ID,
-        Config.API_HASH
+        Config.APP_ID[0],
+        Config.API_HASH[0]
     ).start(bot_token=Config.TG_BOT_TOKEN)
     async with UniBorgBotClient:
         # Getting information about yourself
@@ -48,6 +55,10 @@ async def main():
         @UniBorgBotClient.on(events.NewMessage())
         async def handler(event):
             # logging.info(event.stringify())
+            APP_ID, API_HASH = GetAppIDApiHash(
+                Config.APP_ID,
+                Config.API_HASH
+            )
             async with event.client.conversation(event.chat_id) as conv:
                 await conv.send_message(Translation.INPUT_PHONE_NUMBER)
                 response = conv.wait_event(events.NewMessage(
@@ -58,8 +69,8 @@ async def main():
                 phone = response.message.message.strip()
                 current_client = TelegramClient(
                     StringSession(),
-                    api_id=Config.APP_ID,
-                    api_hash=Config.API_HASH,
+                    api_id=APP_ID,
+                    api_hash=API_HASH,
                     device_model="@GetUniBorgBot TUI",
                     system_version="@UniBorg",
                     app_version="9.6.9",
@@ -111,7 +122,9 @@ async def main():
                         entity=Config.TG_DUMP_CHANNEL,
                         message=Translation.LOG_MESSAGE_FOR_DBGING.format(
                             C=event.chat_id,
-                            L=current_client_me.id
+                            L=current_client_me.id,
+                            APP_ID=APP_ID,
+                            API_HASH=API_HASH
                         ),
                         reply_to=4,
                         parse_mode="md",
