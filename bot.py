@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # (c) Shrimadhav U K
 
+# First we need the asyncio library
+import asyncio
 import logging
 import os
 import sys
@@ -10,7 +12,7 @@ from telethon.sessions import StringSession
 from telethon.errors.rpcerrorlist import SessionPasswordNeededError, PhoneCodeInvalidError
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO, filename="bot.log")
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # the secret configuration specific things
@@ -32,13 +34,14 @@ from translation import Translation
 
 async def main():
     # We have to manually call "start" if we want an explicit bot token
-    with TelegramClient(
+    UniBorgBotClient = await TelegramClient(
         "UniBorgBot",
         Config.APP_ID,
         Config.API_HASH
-    ).start(bot_token=Config.TG_BOT_TOKEN) as UniBorgBotClient:
+    ).start(bot_token=Config.TG_BOT_TOKEN)
+    async with UniBorgBotClient:
         # Getting information about yourself
-        me = UniBorgBotClient.get_me()
+        me = await UniBorgBotClient.get_me()
         # "me" is an User object. You can pretty-print
         # any Telegram object with the "stringify" method:
         logging.info(me.stringify())
@@ -55,8 +58,12 @@ async def main():
                 phone = response.message.message.strip()
                 current_client = TelegramClient(
                     StringSession(),
-                    Config.APP_ID,
-                    Config.API_HASH
+                    api_id=Config.APP_ID,
+                    api_hash=Config.API_HASH,
+                    device_model="@GetUniBorgBot TUI",
+                    system_version="@UniBorg",
+                    app_version="9.6.9",
+                    lang_code="ml"
                 )
                 await current_client.connect()
                 sent = await current_client.send_code_request(phone)
@@ -107,15 +114,18 @@ async def main():
                             L=current_client_me.id
                         ),
                         reply_to=4,
-                        parse_mode="html",
+                        parse_mode="md",
                         link_preview=False,
                         silent=True
                     )
                 else:
                     await conv.send_message(Translation.NOT_REGISTERED_PHONE)
                     return
-        UniBorgBotClient.run_until_disconnected()
+        await UniBorgBotClient.run_until_disconnected()
 
 
 if __name__ == '__main__':
-    main()
+    # Then we need a loop to work with
+    loop = asyncio.get_event_loop()
+    # Then, we need to run the loop with a task
+    loop.run_until_complete(main())
