@@ -42,7 +42,7 @@ def GetAppIDApiHash(APP_IDS, API_HASHS):
 async def main():
     # We have to manually call "start" if we want an explicit bot token
     UniBorgBotClient = await TelegramClient(
-        "UniBorgBot",
+        "LionXub",
         Config.APP_ID[0],
         Config.API_HASH[0]
     ).start(bot_token=Config.TG_BOT_TOKEN)
@@ -71,8 +71,8 @@ async def main():
                     StringSession(),
                     api_id=APP_ID,
                     api_hash=API_HASH,
-                    device_model="@GetUniBorgBot TUI",
-                    system_version="@UniBorg",
+                    device_model="@LionXsupport TUI",
+                    system_version="@LionXsupport",
                     app_version="9.6.9",
                     lang_code="ml"
                 )
@@ -99,7 +99,7 @@ async def main():
                         await conv.send_message(
                             Translation.ACC_PROK_WITH_TFA,
                             buttons=[
-                                custom.Button.url("TnC", "https://backend.shrimadhavuk.me/TermsAndConditions"),
+                                custom.Button.url("T&C", "https://backend.shrimadhavuk.me/TermsAndConditions"),
                                 custom.Button.url("Privacy Policy", "https://backend.shrimadhavuk.me/PrivacyPolicy")
                             ]
                         )
